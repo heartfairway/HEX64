@@ -28,7 +28,7 @@ char *str: 目標字串指標,
 unsigned char *buffer: 來源位元組陣列指標,
 int len: 需要編碼的位元組數量,
 unsigned char caps: 是否於輸出字串中使用大寫字母，視為布林值,
-return value: 輸出字串的長度.
+回傳值: 輸出字串的長度.
 ```
 
 int HEX64_writeBase64(char *str, unsigned char *buffer, int len)
@@ -37,5 +37,5 @@ int HEX64_writeBase64(char *str, unsigned char *buffer, int len)
 char *str: 目標字串指標, 
 unsigned char *buffer: 來源位元組陣列指標,
 int len: 需要編碼的位元組數量,
-return value: 輸出字串的長度.
+回傳值: 輸出字串的長度.
 ```
