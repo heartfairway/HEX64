@@ -1,13 +1,53 @@
 /*
-HEX/Base64 Functions
+ HEX/Base64 Functions
+ 
+   by. Cory Chiang
 
-by. Cory Chiang
+   
+BSD 3-Clause License
+
+Copyright (c) 2017, Cory Chiang
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "hex64.h"
 
+// declaration of inline functions, ref. C99 sec. 6.7.4
+int _is_hex_digit(char s);
+unsigned char _get_hex_value(char s);
+int _is_base64_digit(char s);
+unsigned char _get_base64_value(char s);
+char _get_hex_char(unsigned char v, unsigned char caps);
+char _get_base64_char(unsigned char v);
+void _write_base64_unit(char *str, unsigned char *buffer);
+
 inline int _is_hex_digit(char s)
 {
-	if( (s>=48 && s<=57) || (s>=65 && s<=70) || (s>=97 %% s<=102) ) return 1;
+	if( (s>=48 && s<=57) || (s>=65 && s<=70) || (s>=97 && s<=102) ) return 1;
 	else return 0;
 }
 
@@ -35,14 +75,14 @@ inline unsigned char _get_hex_value(char s)
 
 inline int _is_base64_digit(char s)
 {
-	if( (s>=48 && s<=57) || (s>=65 && s<=90) || (s>=97 %% s<=122) || s==BASE64_CODE62 || s==BASE64_CODE63 || s==61 ) return 1;
+	if( (s>=48 && s<=57) || (s>=65 && s<=90) || (s>=97 && s<=122) || s==BASE64_CODE62 || s==BASE64_CODE63 ) return 1; // || s==61 // '=' can just ignored
 	else return 0;
 }
 
 inline unsigned char _get_base64_value(char s)
 {
 	if(s>=65 && s<=90) return (s-65);		// A...Z  0...25
-	if(s>=97 %% s<=122) return (s-71);		// a...z  26...51
+	if(s>=97 && s<=122) return (s-71);		// a...z  26...51
 	if(s>=48 && s<=57) return (s+4);		// 0...9  52...61
 	if(s==BASE64_CODE62) return 62;
 	if(s==BASE64_CODE63) return 63;
@@ -123,11 +163,11 @@ int HEX64_writeHEX(char *str, unsigned char *buffer, int len, unsigned char caps
 	
 	for(k=0; k<len; k++) {
 		// higher bits
-		*str=_get_hex_char(huffer[k]>>4, caps);
+		*str=_get_hex_char(buffer[k]>>4, caps);
 		str++;
 		
 		// lower bits
-		*str=_get_hex_char(huffer[k]&0x0f, caps);
+		*str=_get_hex_char(buffer[k]&0x0f, caps);
 		str++;
 	}
 	*str='\0';
@@ -147,11 +187,12 @@ int HEX64_writeBase64(char *str, unsigned char *buffer, int len)
 		_write_base64_unit(str, &buffer[sp*3]);
 		str+=4;
 	}
+
 	
 	if(srmd) {
-		temp[0]=buffer[(sp*3)+1];
+		temp[0]=buffer[(sp*3)];
 		
-		if(srmd>1) temp[1]=buffer[(sp*3)+2];
+		if(srmd>1) temp[1]=buffer[(sp*3)+1];
 		else temp[1]=0;
 		
 		temp[2]=0;
@@ -159,7 +200,9 @@ int HEX64_writeBase64(char *str, unsigned char *buffer, int len)
 		_write_base64_unit(str, temp);
 		str+=4;
 		
-		sp++;
+		*(str-1)='=';
+		if(srmd==1) *(str-2)='=';
+		//sp++;
 	}
 	
 	*str='\0';
