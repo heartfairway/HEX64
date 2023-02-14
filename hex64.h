@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __HEX64_H_
 
 #define BASE64_CODE62	'+'
-#define BASE64_CODE63	'/'
+#define BASE64_CODE63	'_'
 
 int HEX64_readHEX(unsigned char *buffer, char *str, int len);
 int HEX64_readBase64(unsigned char *buffer, char *str, int len);
